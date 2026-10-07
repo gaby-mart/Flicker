@@ -1,4 +1,4 @@
-import "./home.css";
+import "./Home.css";
 import "../../styles/global.css";
 
 // 1. Adicione esta linha de importação no topo:

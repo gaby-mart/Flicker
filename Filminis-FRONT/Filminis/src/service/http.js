@@ -22,3 +22,9 @@ export async function getIdMovie(id) {
         return[];
     }
 }
+
+export async function searchMovies(term){
+    const baseUrl = `${DATA_URL}/search?query=${term}`
+
+    const response = await fetch((`${baseUrl}/listagem?busca=${encodeURIComponent(term)}`))
+}
