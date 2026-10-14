@@ -3,6 +3,7 @@
   padding: 0;
   box-sizing: border-box;
   background-color: var(--black);
+  color:var(--white)
 }
 
 :root{
@@ -15,4 +16,5 @@
     --light-gray: #F8F8F8;
     --light-black: #201B1B;
 }
+
 

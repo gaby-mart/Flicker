@@ -1,0 +1,25 @@
+/* Container principal que segura a sidebar e o conteúdo lado a lado */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg, #080808);
+    gap: 20px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+/* Coluna da direita que agrupa Header, Conteúdo e Footer */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0; /* Evita que elementos filhos estourem a tela */
+    gap: 20px;
+}
+
+/* Área onde o conteúdo das páginas (Home, Filmes, etc.) é renderizado */
+.content-area {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}

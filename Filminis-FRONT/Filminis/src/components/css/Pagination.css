@@ -1,0 +1,61 @@
+.pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 32px 0 20px;
+}
+
+/* Botões numéricos (Bolinhas) */
+.pagination-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(245, 245, 245, 0.2); /* Borda sutil idêntica ao Figma */
+    color: var(--text-muted, #8a8a8a);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.pagination-number:hover {
+    border-color: var(--text, #f5f5f5);
+    color: var(--text, #f5f5f5);
+}
+
+/* Bolinha Ativa (Vermelha Flicker) */
+.pagination-number.active {
+    background-color: var(--accent, #E01414);
+    border-color: var(--accent, #E01414);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(224, 20, 20, 0.4);
+}
+
+/* Botões de Setas (< e >) */
+.pagination-arrow {
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #8a8a8a);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 12px;
+    outline: none;
+    transition: color 0.2s;
+}
+
+.pagination-arrow:hover:not(:disabled) {
+    color: var(--text, #f5f5f5);
+}
+
+.pagination-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

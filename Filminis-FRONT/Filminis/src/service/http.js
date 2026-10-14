@@ -1,30 +1,30 @@
-const DATA_URL = import.meta.env.VITE_DATA_URL
+const DATA_URL = import.meta.env.VITE_DATA_URL || "http://localhost:8000"
 
-export async function getMovies() {
-    
-    const response = await fetch(`${DATA_URL}/listagem`)
-    
-    if (!response.ok) throw new Error("Error on fetching movies data")
-    console.log(response)
+async function get(path) {
+    const response = await fetch(`${DATA_URL}${path}`)
+
+    if (!response.ok) throw new Error(`Erro ${response.status} em ${path}`)
+
     return response.json()
 }
 
+// Lista todos os filmes (a busca por nome é feita no front, na Home)
+export const getMovies = () => get("/listagem")
+
+// Um filme pelo id
 export async function getIdMovie(id) {
-    try{
-        const response = await fetch(`http://localhost:8000/filme?id=${id}`)
-        if(!response.ok){
-            throw new Error("Erro on fetching movies data")
-        }
-        const dados = await response.json()
-        return dados
-    }catch(erro){
-        console.error("Erro na API")
-        return[];
+    try {
+        return await get(`/filme?id=${id}`)
+    } catch (erro) {
+        console.error("Erro na API:", erro)
+        return null
     }
 }
 
-export async function searchMovies(term){
-    const baseUrl = `${DATA_URL}/search?query=${term}`
-
-    const response = await fetch((`${baseUrl}/listagem?busca=${encodeURIComponent(term)}`))
-}
+// Listas auxiliares (úteis para filtros e formulários)
+export const getActors = () => get("/atores")
+export const getDirectors = () => get("/diretores")
+export const getCategories = () => get("/categorias")
+export const getProducers = () => get("/produtoras")
+export const getLanguages = () => get("/linguagens")
+export const getCountries = () => get("/paises")

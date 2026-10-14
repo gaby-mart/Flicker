@@ -1,56 +1,45 @@
-import { useState, useEffect } from "react";
-import "../css/header.css";
-import MagnifyingGlass from "../../../src/assets/images/lupa.svg";
-import DefaultAvatar from "../../../src/assets/images/defaul-login.jpg" // adicione uma imagem padrão se tiver
+import { useNavigate, useSearchParams } from "react-router-dom";
+import "../css/Header.css";
+import lupa from "../../assets/images/lupa.svg";
+import avatar from "../../assets/images/defaul-login.jpg";
 
-export default function Header({ searchTerm, setSearchTerm }) {
-  // 1. Declarar o estado do usuário
-  const [user, setUser] = useState(null);
+export default function Header() {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const busca = searchParams.get("busca") ?? "";
 
-  // 2. Buscar as informações do usuário logado (ex: no localStorage)
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Erro ao ler os dados do usuário:", e);
-      }
+    function handleChange(e) {
+        const termo = e.target.value;
+        navigate(termo ? `/?busca=${encodeURIComponent(termo)}` : "/", {
+            replace: true,
+        });
     }
-  }, []);
 
-  return (
-    <header className="app-header">
-      {/* Lado Esquerdo: Campo de Busca */}
-      <div className="header-left">
-        <div className="search-box">
-          <img src={MagnifyingGlass} alt="Lupa de busca" className="search-icon" />
-          <input
-            type="text"
-            placeholder="Insira o filme desejado"
-            className="search-input"
-            value={searchTerm || ""}
-            onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+    return (
+        <header className="topbar">
+            <label className="topbar-search">
+                <img src={lupa} alt="" width="14" height="14" />
+                <input
+                    type="text"
+                    placeholder="Insira o filme desejado"
+                    value={busca}
+                    onChange={handleChange}
+                />
+            </label>
 
-      {/* Lado Direito: Perfil do Usuário */}
-      <div className="header-right">
-        {user ? (
-          <div className="profile-container">
-            <img
-              src={user.avatarUrl || user.foto || DefaultAvatar}
-              alt={user.nome || "Foto de perfil"}
-              className="user-avatar"
-            />
-          </div>
-        ) : (
-          <a href="/login" className="login-button">
-            Entrar
-          </a>
-        )}
-      </div>
-    </header>
-  );
+            <div className="topbar-actions">
+                <button className="topbar-bell" aria-label="Notificações">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" strokeWidth="2"
+                         strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                    </svg>
+                    <span className="topbar-dot" />
+                </button>
+
+                <img className="topbar-avatar" src={avatar} alt="Foto do usuário" />
+            </div>
+        </header>
+    );
 }

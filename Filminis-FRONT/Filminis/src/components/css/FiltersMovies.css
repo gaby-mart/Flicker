@@ -1,0 +1,111 @@
+.filters-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Select */
+.select-box {
+    position: relative;
+    width: 220px;
+}
+
+.select-box select {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text, #f5f5f5);
+    background: var(--surface-2, #1f1f1f);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.select-box select:focus {
+    border-color: var(--accent, #8b0000);
+}
+
+.select-box select option {
+    color: #f5f5f5;
+    background: #1f1f1f;
+}
+
+.select-arrow-icon {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted, #8a8a8a);
+    pointer-events: none;
+}
+
+/* Botões de ordenação */
+.sort-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.sort-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--text-muted, #8a8a8a);
+    background: var(--surface-2, #1f1f1f);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.sort-btn:hover {
+    color: var(--text, #f5f5f5);
+}
+
+.sort-btn.active {
+    color: var(--text, #f5f5f5);
+    border-color: var(--accent, #8b0000);
+}
+
+/* Botão vermelho */
+.request-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent, #8b0000);
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.request-btn:hover {
+    filter: brightness(1.15);
+}
+
+/* Remove qualquer quadrado ou fundo preto em volta de ícones e SVGs */
+button svg,
+.sort-btn svg,
+.request-btn svg,
+.icon-img {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}

@@ -1,0 +1,96 @@
+/* Grade de Filmes centralizada com 5 colunas por linha */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(160px, 200px)); /* Garante 5 cards exatos por linha */
+    justify-content: center; /* Centraliza o grid horizontalmente na tela */
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto; /* Centraliza o bloco inteiro */
+    padding: 20px 0;
+}
+
+/* Card Individual */
+.movie-card {
+    position: relative;
+    background-color: var(--surface-2, #161616);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 1px solid rgba(245, 245, 245, 0.08);
+}
+
+.movie-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    border-color: rgba(224, 20, 20, 0.4);
+}
+
+.movie-card-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    position: relative;
+}
+
+/* Pôster do Filme */
+.movie-poster {
+    width: 100%;
+    height: 250px; /* Altura proporcional para os 5 cards caberem lado a lado */
+    object-fit: cover;
+    display: block;
+}
+
+/* Botão de Opções (Três pontinhos no canto superior) */
+.movie-options-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.2s;
+}
+
+.movie-options-btn span {
+    width: 3px;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.movie-options-btn:hover {
+    background: rgba(224, 20, 20, 0.8);
+}
+
+/* Área de Informações (Título na parte inferior com gradiente) */
+.movie-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 10px 10px 10px;
+    background: linear-gradient(to top, rgba(8, 8, 8, 0.95) 0%, rgba(8, 8, 8, 0.6) 60%, transparent 100%);
+    box-sizing: border-box;
+}
+
+.movie-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text, #f5f5f5);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

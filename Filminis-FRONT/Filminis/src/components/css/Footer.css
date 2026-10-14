@@ -1,0 +1,51 @@
+/* Container Principal do Footer */
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 32px 24px 24px;
+    background-color: rgba(22, 22, 22, 0.75); /* Mesmo tom translúcido do header/sidebar */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(245, 245, 245, 0.08); /* Borda sutil idêntica ao design system do Flicker */
+    box-sizing: border-box;
+    margin-top: auto; /* Garante que fique na parte inferior se utilizado com Flexbox column */
+}
+
+/* Seção superior do footer (onde fica a logo) */
+.footer-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    background: transparent;
+}
+
+/* Logo do Footer */
+.footer-logo {
+    height: 60px; /* Ajuste proporcional ao tamanho da marca */
+    width: auto;
+    object-fit: contain;
+    background: transparent;
+}
+
+/* Seção inferior do footer (texto de direitos e aviso acadêmico) */
+.footer-bottom {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+    background: transparent;
+    border-top: 1px solid rgba(245, 245, 245, 0.08); /* Linha divisória sutil */
+    padding-top: 16px;
+}
+
+.footer-bottom p {
+    font-size: 12px;
+    color: rgba(245, 245, 245, 0.6); /* Texto secundário suave */
+    font-family: inherit;
+    line-height: 1.5;
+    margin: 0;
+    background: transparent;
+}
