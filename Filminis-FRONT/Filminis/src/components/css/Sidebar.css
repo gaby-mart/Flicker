@@ -159,3 +159,8 @@
     border-radius: 0 0 12px 12px;
     padding-top: 16px;
 }
+
+/* Espaço entre a seção "Geral" e a "Administração" */
+.section-admin {
+    margin-top: 22px;
+}

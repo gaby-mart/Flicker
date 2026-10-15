@@ -1,3 +1,5 @@
+import { authFetch } from "./auth"
+
 const DATA_URL = import.meta.env.VITE_DATA_URL || "http://localhost:8000"
 
 async function get(path) {
@@ -28,3 +30,13 @@ export const getCategories = () => get("/categorias")
 export const getProducers = () => get("/produtoras")
 export const getLanguages = () => get("/linguagens")
 export const getCountries = () => get("/paises")
+
+
+export async function deleteMovie(id) {
+    const response = await authFetch(`/filme?id=${id}`, { method: "DELETE" })
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) throw new Error(data.error || "Erro ao excluir o filme")
+
+    return data
+}

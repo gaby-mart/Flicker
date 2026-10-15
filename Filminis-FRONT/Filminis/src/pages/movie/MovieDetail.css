@@ -1,0 +1,9 @@
+.movie-detail-page {
+    width: 100%;
+}
+
+.movie-detail-status {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--text-muted, #8a8a8a);
+}

@@ -1,10 +1,16 @@
+//Coisa React
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
+//Componentes
 import { getMovies } from "../../service/http"
 import MovieList from "../../components/jsx/MovieList"
 import { FiltersMovies } from "../../components/jsx/FiltersMovies"
+import Hero from "../../components/jsx/Hero.jsx"
+
+//Styles
 import "../../styles/global.css"
+import "./Home.css"
 import "../../components/css/Pagination.css" 
 
 const normalizar = (texto) =>
@@ -89,6 +95,10 @@ export default function Home() {
 
     return (
         <section className="home">
+
+            {/*HeroBanner*/}
+            {!loading && !error && <Hero movies={movies.slice(0, 5)} />}
+
             <h2 className="section-title-center">RECOMENDAÇÕES</h2>
 
             <FiltersMovies

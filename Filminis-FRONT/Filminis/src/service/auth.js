@@ -114,3 +114,17 @@ export async function logout() {
         clearTokens()
     }
 }
+
+export async function register(dados) {
+    const response = await fetch(`${DATA_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) throw new Error(data.error || "Erro ao cadastrar usuário")
+
+    return data
+}

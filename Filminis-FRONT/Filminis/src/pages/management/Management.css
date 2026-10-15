@@ -1,0 +1,159 @@
+.page-body {
+  display: flex;
+  flex: 1;
+  font-family: 'BoschSans', sans-serif;
+  color: #f5f5f5 ;
+  background-color: var(--bosch-white);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-title {
+  margin: 2rem 2.5rem 1rem 2.5rem;
+}
+
+.page-title h1 {
+  font-size: 40px;
+  color: #f5f5f5;
+  margin: 0;
+}
+
+
+/* Telas médias: o botão desce para a linha de baixo */
+@media (max-width: 1100px) {
+  .filters-container {
+    flex-wrap: wrap;
+  }
+
+  .filters-container .filters-bar {
+    flex: 1 1 100%;
+  }
+
+  .filters-container .button {
+    margin-left: 0;
+  }
+}
+
+/* Telas pequenas: espaçamento menor e botão em largura total */
+@media (max-width: 720px) {
+  .filters-container {
+    padding: 0 1rem;
+    gap: 12px;
+  }
+
+  .filters-container .button {
+    width: 100%;
+  }
+
+  .filters-container .button button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.btn-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Ajustes para botões internos e componentes de filtros */
+.filters-container .button button,
+.btn-primary {
+  background-color: var(--bosch-blue-50) !important;
+  color: #f5f5f5 !important;
+  border: none;
+  padding: 12px 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.filters-container .button button:hover,
+.btn-primary:hover {
+  background-color: var(--bosch-blue-60) !important;
+}
+
+/* ==========================================================================
+   TABELA DE DADOS
+   ========================================================================== */
+.table-container {
+    color: #f5f5f5;
+  width: 100%;
+  padding: 0 2.5rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+thead th {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e5e7eb;
+  border-bottom: 2px solid var(--bosch-black);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+tbody td {
+  padding: 16px;
+  font-size: 13px;
+  color: #f5f5f5;
+  vertical-align: middle;
+}
+
+
+/* Botões de Ação */
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-right: 4px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  opacity: 1;
+  border: 4px;
+  border-color: #e5e7eb;
+}
+
+.action-btn img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.action-btn.delete:hover,
+.action-btn.delete:active {
+  border: 4px;
+  border-color: #e5e7eb;
+}
+
+
