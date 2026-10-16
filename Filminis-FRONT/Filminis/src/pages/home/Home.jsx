@@ -1,17 +1,30 @@
 //Coisa React
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 //Componentes
-import { getMovies } from "../../service/http"
+import {
+    getMovies,
+    requestMovie,
+    getCategories,
+    getProducers,
+    getDirectors,
+    getActors,
+    getCountries,
+    getLanguages,
+} from "../../service/http"
+import { isLoggedIn } from "../../service/auth"
+import { uploadImage } from "../../service/upload"
 import MovieList from "../../components/jsx/MovieList"
 import { FiltersMovies } from "../../components/jsx/FiltersMovies"
 import Hero from "../../components/jsx/Hero.jsx"
+import ModalMovieForm from "../../components/jsx/ModalMovieForm"
+import ToastNotification from "../../components/jsx/ToastNotification"
 
 //Styles
 import "../../styles/global.css"
 import "./Home.css"
-import "../../components/css/Pagination.css" 
+import "../../components/css/Pagination.css"
 
 const normalizar = (texto) =>
     String(texto ?? "")
@@ -25,6 +38,12 @@ const toCategoryList = (categorias) =>
         .map((c) => String(c).trim())
         .filter(Boolean)
 
+// HH:MM:SS
+const toTimeValue = (value) => {
+    const [h = "00", m = "00"] = String(value).split(":")
+    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}:00`
+}
+
 export default function Home() {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
@@ -34,11 +53,25 @@ export default function Home() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
 
-    // Status filtros e paginação
+    // Filtros e paginação
     const [genreFilter, setGenreFilter] = useState("")
     const [sortOrder, setSortOrder] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 10 // Limite de 5 cards por página
+    const itemsPerPage = 10
+
+    // Modal de solicitação de filme
+    const [modalOpen, setModalOpen] = useState(false)
+    const [sending, setSending] = useState(false)
+    const [modalError, setModalError] = useState("")
+    const [options, setOptions] = useState({})
+
+    // Toast
+    const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" })
+
+    const closeToast = useCallback(
+        () => setToast((prev) => ({ ...prev, isOpen: false })),
+        []
+    )
 
     useEffect(() => {
         async function loadMovies() {
@@ -56,7 +89,7 @@ export default function Home() {
         loadMovies()
     }, [])
 
-    // Reseta para a página 1 sempre que o filtro ou busca mudarem
+    // Volta para a página 1 quando filtro ou busca mudam
     useEffect(() => {
         setCurrentPage(1)
     }, [busca, genreFilter, sortOrder])
@@ -86,16 +119,78 @@ export default function Home() {
         )
     }, [movies, busca, genreFilter, sortOrder])
 
-    // Cálculo da paginação (apenas 5 por vez)
     const totalPages = Math.ceil(filteredMovies.length / itemsPerPage) || 1
+
     const paginatedMovies = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage
         return filteredMovies.slice(start, start + itemsPerPage)
     }, [filteredMovies, currentPage])
 
+    // Abre o modal e carrega as listas 
+    async function openRequestModal() {
+        if (!isLoggedIn()) return navigate("/login")
+
+        setModalError("")
+        setModalOpen(true)
+
+        if (Object.keys(options).length === 0) {
+            const [categorias, produtoras, diretores, atores, paises, linguagens] =
+                await Promise.all(
+                    [
+                        getCategories(),
+                        getProducers(),
+                        getDirectors(),
+                        getActors(),
+                        getCountries(),
+                        getLanguages(),
+                    ].map((p) => p.catch(() => []))
+                )
+
+            setOptions({ categorias, produtoras, diretores, atores, paises, linguagens })
+        }
+    }
+
+    // Envia a solicitação
+    async function handleSubmitRequest({ form, poster }) {
+        setSending(true)
+        setModalError("")
+
+        try {
+            await requestMovie({
+                titulo: form.titulo.trim(),
+                ano: new Date(form.data).getFullYear(),
+                sinopse: form.sinopse.trim(),
+                duracao: toTimeValue(form.duracao), 
+                orcamento: form.orcamento || "0",
+                imagem: poster ? await uploadImage(poster) : null,
+                categoria_id: form.categorias,
+                produtora_id: form.produtoras,
+                diretor_id: form.diretores,
+                atores_ids: form.atores,
+                pais_origem_id: form.paises,
+                linguagem_id: form.linguagens,
+            })
+
+            setModalOpen(false)
+            setToast({
+                isOpen: true,
+                message: "Solicitação enviada com sucesso! Aguarde a análise de um administrador.",
+                type: "success",
+            })
+        } catch (err) {
+            setModalError(err.message)
+            setToast({
+                isOpen: true,
+                message: "Não foi possível enviar a solicitação.",
+                type: "warning",
+            })
+        } finally {
+            setSending(false)
+        }
+    }
+
     return (
         <section className="home">
-
             {/*HeroBanner*/}
             {!loading && !error && <Hero movies={movies.slice(0, 5)} />}
 
@@ -107,7 +202,7 @@ export default function Home() {
                 setGenreFilter={setGenreFilter}
                 sortOrder={sortOrder}
                 setSortOrder={setSortOrder}
-                onRequestMovie={() => navigate("/solicitar-filme")}
+                onRequestMovie={openRequestModal}
             />
 
             {loading && <p className="home-status">Carregando os filmes...</p>}
@@ -117,7 +212,7 @@ export default function Home() {
                 <>
                     <MovieList movies={paginatedMovies} />
 
-                    {/* Controles de Paginação */}
+                    {/* Controles de paginação */}
                     {totalPages > 1 && (
                         <div className="pagination-container">
                             <button
@@ -149,6 +244,22 @@ export default function Home() {
                     )}
                 </>
             )}
+
+            <ModalMovieForm
+                isOpen={modalOpen}
+                options={options}
+                loading={sending}
+                error={modalError}
+                onSubmit={handleSubmitRequest}
+                onCancel={() => setModalOpen(false)}
+            />
+
+            <ToastNotification
+                isOpen={toast.isOpen}
+                message={toast.message}
+                type={toast.type}
+                onClose={closeToast}
+            />
         </section>
     )
 }

@@ -40,3 +40,16 @@ export async function deleteMovie(id) {
 
     return data
 }
+
+export async function requestMovie(dados) {
+    const response = await authFetch("/cadastrani", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+    })
+
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data.error || "Erro ao enviar a solicitação")
+
+    return data
+}

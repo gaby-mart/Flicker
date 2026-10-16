@@ -33,14 +33,21 @@ const formatMoney = (value) => {
     return number.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 }
 
-export default function MovieDetailCard({ movie, canEdit, onEdit, onDelete }) {
+// "03:15:00" -> "3h 15min"
+const formatDuration = (value) => {
+    if (!value) return "—"
+    const [h = "0", m = "0"] = String(value).split(":")
+    return `${Number(h)}h ${m.padStart(2, "0")}min`
+}
+
+export default function MovieDetailCard({ movie, onEdit, onDelete }) {
     const [favorite, setFavorite] = useState(false)
 
     const posterUrl = pick(movie, "imagem", "poster")
 
     const rows = [
         ["Ano de lançamento", toText(pick(movie, "ano"))],
-        ["Duração", toText(pick(movie, "duracao"))],
+        ["Duração", formatDuration(pick(movie, "duracao"))],
         ["Produtora", toText(pick(movie, "produtoras", "produtora"))],
         ["Direção", toText(pick(movie, "diretores", "diretor"))],
         ["Atores", toText(pick(movie, "atores"))],
@@ -91,16 +98,14 @@ export default function MovieDetailCard({ movie, canEdit, onEdit, onDelete }) {
                     {description || "Sem sinopse disponível."}
                 </p>
 
-                {canEdit && (
-                    <div className="movie-detail-actions">
-                        <button type="button" className="btn-edit" onClick={onEdit}>
-                            Editar
-                        </button>
-                        <button type="button" className="btn-delete" onClick={onDelete}>
-                            Excluir
-                        </button>
-                    </div>
-                )}
+                <div className="movie-detail-actions">
+                    <button type="button" className="btn-edit" onClick={onEdit}>
+                        Solicitar Edição
+                    </button>
+                    <button type="button" className="btn-delete" onClick={onDelete}>
+                        Solicitar Exclusão
+                    </button>
+                </div>
             </div>
         </article>
     )

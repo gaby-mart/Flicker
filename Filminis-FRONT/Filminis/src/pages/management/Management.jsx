@@ -1,183 +1,196 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import ToastNotification from "../../components/jsx/ToastNotification";
-import { getMovies, deleteMovie } from "../../service/http";
-import Pagination from "../../components/jsx/Pagination.jsx";
+//Componentes
+import { useState, useEffect, useMemo } from "react"
+import ToastNotification from "../../components/jsx/ToastNotification"
+import { getMovies, deleteMovie } from "../../service/http"
+import Pagination from "../../components/jsx/Pagination.jsx"
+import FiltersManagement from "../../components/jsx/FiltersManagement.jsx"
 
-import Edit from "../../assets/images/edit.svg";
-import Delete from "../../assets/images/delete.svg";
+//Styles
+import "./Management.css"
 
-import "./Management.css";
-
-const normalize = (text) =>
-  (text || "")
+const normalizar = (texto) =>
+  String(texto ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .trim()
 
-// Função para cortar o texto após um limite de caracteres e adicionar "..."
-const truncateText = (text, maxLength = 60) => {
-  if (!text) return "-";
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + "...";
-};
+const toCategoryList = (categorias) =>
+  (Array.isArray(categorias) ? categorias : String(categorias ?? "").split(","))
+    .map((c) => String(c).trim())
+    .filter(Boolean)
+
+// Aceita texto ou lista e corta após um limite
+const truncateText = (value, maxLength = 60) => {
+  const text = Array.isArray(value) ? value.join(", ") : String(value ?? "")
+  if (!text) return "-"
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength).trim() + "..."
+}
 
 export default function Management() {
-  const navigate = useNavigate();
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  // Filtros
+  const [busca, setBusca] = useState("")
+  const [genreFilter, setGenreFilter] = useState("")
+  const [sortOrder, setSortOrder] = useState("")
 
-  // Estados de paginação
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
+  // Paginação
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(6)
 
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  // Exclusão
+  const [itemToDelete, setItemToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const [toast, setToast] = useState({
     isOpen: false,
     message: "",
     type: "success",
-  });
+  })
 
-  // Carrega os filmes do backend do Flicker ao abrir a tela
   useEffect(() => {
     async function fetchMovies() {
-      setLoading(true);
+      setLoading(true)
       try {
-        const data = await getMovies();
-        setMovies(Array.isArray(data) ? data : []);
+        const data = await getMovies()
+        setMovies(Array.isArray(data) ? data : [])
       } catch (err) {
-        console.error("Erro ao carregar filmes:", err);
+        console.error("Erro ao carregar filmes:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
-    fetchMovies();
-  }, []);
+    fetchMovies()
+  }, [])
 
-  // Reseta para a primeira página sempre que o termo de busca mudar
+  // Volta para a primeira página quando qualquer filtro muda
   useEffect(() => {
-    setPage(1);
-  }, [searchTerm]);
+    setPage(1)
+  }, [busca, genreFilter, sortOrder])
 
-  // Lógica de exclusão de filme
+  // Gêneros disponíveis, extraídos dos filmes
+  const genres = useMemo(() => {
+    const set = new Set()
+    movies.forEach((m) => toCategoryList(m.categorias).forEach((c) => set.add(c)))
+    return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"))
+  }, [movies])
+
+  // Busca + gênero + ordenação
+  const filteredMovies = useMemo(() => {
+    const termo = normalizar(busca)
+
+    const result = movies.filter(
+      (movie) =>
+        (!termo || normalizar(movie.titulo).includes(termo)) &&
+        (!genreFilter || toCategoryList(movie.categorias).includes(genreFilter))
+    )
+
+    if (!sortOrder) return result
+
+    return [...result].sort((a, b) =>
+      sortOrder === "asc"
+        ? String(a.titulo).localeCompare(String(b.titulo), "pt-BR")
+        : String(b.titulo).localeCompare(String(a.titulo), "pt-BR")
+    )
+  }, [movies, busca, genreFilter, sortOrder])
+
+  // Paginação
+  const totalPages = Math.max(1, Math.ceil(filteredMovies.length / rowsPerPage))
+  const currentPage = Math.min(page, totalPages)
+  const startIndex = (currentPage - 1) * rowsPerPage
+  const paginatedMovies = filteredMovies.slice(startIndex, startIndex + rowsPerPage)
+
   const handleConfirmDelete = async () => {
-    if (!itemToDelete) return;
-    setDeleting(true);
+    if (!itemToDelete) return
+    setDeleting(true)
     try {
-      await deleteMovie(itemToDelete.id);
-      setMovies((prev) => prev.filter((m) => m.id !== itemToDelete.id));
-      setToast({ isOpen: true, message: "Filme excluído com sucesso!", type: "success" });
-      setItemToDelete(null);
+      await deleteMovie(itemToDelete.id)
+      setMovies((prev) => prev.filter((m) => m.id !== itemToDelete.id))
+      setToast({ isOpen: true, message: "Filme excluído com sucesso!", type: "success" })
+      setItemToDelete(null)
     } catch (err) {
-      console.error(err);
-      setToast({ isOpen: true, message: "Erro ao excluir filme.", type: "warning" });
+      console.error(err)
+      setToast({ isOpen: true, message: "Erro ao excluir filme.", type: "warning" })
     } finally {
-      setDeleting(false);
+      setDeleting(false)
     }
-  };
-
-  // Filtra os filmes dinamicamente com base no título
-  const filteredMovies = movies.filter((movie) =>
-    normalize(movie.titulo).includes(normalize(searchTerm))
-  );
-
-  // Cálculos da paginação
-  const totalPages = Math.max(1, Math.ceil(filteredMovies.length / rowsPerPage));
-  const currentPage = Math.min(page, totalPages);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedMovies = filteredMovies.slice(startIndex, startIndex + rowsPerPage);
+  }
 
   return (
-    <div className="app">
-      <div className="app-container">
-        <main className="main-wrapper">
-          <div className="page-title">
-            <h1>Gerenciamento de Filmes</h1>
-          </div>
+    <section className="management">
+      <div className="page-title">
+        <h1>Gerenciamento de Filmes</h1>
+      </div>
 
-          <div className="management-header-actions">
-            <span className="results-count">
-              Total de filmes: {filteredMovies.length}
-            </span>
-          </div>
+      <div className="management-header-actions">
+        <FiltersManagement
+          busca={busca}
+          setBusca={setBusca}
+          genres={genres}
+          genreFilter={genreFilter}
+          setGenreFilter={setGenreFilter}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+        />
+      </div>
 
-          {/* Tabela de listagem seguindo o design do Figma */}
-          <div className="table-container">
-            {loading ? (
-              <p className="home-status">Carregando dados...</p>
-            ) : (
-              <>
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: "left" }}>Nome</th>
-                      <th style={{ textAlign: "left" }}>Descrição</th>
-                      <th style={{ textAlign: "center" }}>Data de aprovação</th>
-                      <th style={{ textAlign: "right" }}>Ações</th>
+      <div className="table-container">
+        {loading ? (
+          <p className="home-status">Carregando dados...</p>
+        ) : (
+          <>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Descrição</th>
+                  <th>Gênero</th>
+                  <th>Aprovado por</th>
+                  <th>Data de aprovação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedMovies.length > 0 ? (
+                  paginatedMovies.map((movie) => (
+                    <tr key={movie.id}>
+                      <td className="movie-name-cell">{movie.titulo}</td>
+                      <td className="table-description" title={movie.sinopse}>
+                        {truncateText(movie.sinopse, 50)}
+                      </td>
+                      <td className="table-description" title={String(movie.categorias ?? "")}>
+                        {truncateText(movie.categorias, 50)}
+                      </td>
+                      <td className="table-description" title={movie.aprovado_por}>
+                        {truncateText(movie.aprovado_por, 50)}
+                      </td>
+                      <td>{movie.data_aprovacao || movie.criado_em || "-"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedMovies.length > 0 ? (
-                      paginatedMovies.map((movie) => (
-                        <tr key={movie.id}>
-                          <td className="movie-name-cell" style={{ textAlign: "left" }}>
-                            {movie.titulo}
-                          </td>
-                          {/* Exibe o texto cortado por caracteres e mostra o texto completo no hover (title) */}
-                          <td className="table-description" style={{ textAlign: "left" }} title={movie.sinopse}>
-                            {truncateText(movie.sinopse, 50)}
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            {movie.data_aprovacao || movie.criado_em || "-"}
-                          </td>
-                          <td style={{ textAlign: "right" }}>
-                            <div className="action-buttons-group" style={{ justifyContent: "flex-end" }}>
-                              <button
-                                className="action-btn edit"
-                                title="Editar"
-                                onClick={() => navigate(`/filme/editar?id=${movie.id}`)}
-                              >
-                                <img src={Edit} alt="Editar" />
-                              </button>
-                              <button
-                                className="action-btn delete"
-                                title="Deletar"
-                                onClick={() => setItemToDelete(movie)}
-                              >
-                                <img src={Delete} alt="Deletar" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={4} style={{ textAlign: "center", padding: "20px" }}>
-                          Nenhum registro encontrado.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="table-empty">
+                      Nenhum registro encontrado.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
-                <Pagination
-                  total={filteredMovies.length}
-                  page={currentPage}
-                  rowsPerPage={rowsPerPage}
-                  onPageChange={setPage}
-                  onRowsPerPageChange={(n) => {
-                    setRowsPerPage(n);
-                    setPage(1);
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </main>
+            <Pagination
+              total={filteredMovies.length}
+              page={currentPage}
+              rowsPerPage={rowsPerPage}
+              onPageChange={setPage}
+              onRowsPerPageChange={(n) => {
+                setRowsPerPage(n)
+                setPage(1)
+              }}
+            />
+          </>
+        )}
       </div>
 
       <ToastNotification
@@ -187,22 +200,21 @@ export default function Management() {
         onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
       />
 
-      {/* Modal simples de confirmação de exclusão */}
       {itemToDelete && (
         <div className="modal-overlay">
           <div className="modal-card">
             <h3>Deseja excluir "{itemToDelete.titulo}"?</h3>
             <p>Esta ação não poderá ser desfeita.</p>
             <div className="modal-actions">
-              <button 
-                className="btn-cancel" 
+              <button
+                className="btn-cancel"
                 onClick={() => setItemToDelete(null)}
                 disabled={deleting}
               >
                 Cancelar
               </button>
-              <button 
-                className="btn-confirm-delete" 
+              <button
+                className="btn-confirm-delete"
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >
@@ -212,6 +224,6 @@ export default function Management() {
           </div>
         </div>
       )}
-    </div>
-  );
+    </section>
+  )
 }
