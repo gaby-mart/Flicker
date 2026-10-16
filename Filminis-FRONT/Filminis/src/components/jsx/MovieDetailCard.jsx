@@ -11,7 +11,7 @@ const pick = (obj, ...keys) => {
     return null
 }
 
-// Aceita texto, lista de textos ou lista de objetos { nome, sobrenome }
+// Aceita texto, lista de textos ou lista de objetos 
 const nameOf = (v) => {
     if (v === null || v === undefined) return ""
     if (typeof v !== "object") return String(v)

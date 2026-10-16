@@ -19,7 +19,70 @@ const INITIAL = {
     linguagens: [],
 }
 
-export default function ModalMovieForm({ isOpen, options, loading, error, onSubmit, onCancel }) {
+const normalize = (t) =>
+    String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+
+const labelOf = (o) =>
+    [o.nome ?? o.name, o.sobrenome].filter(Boolean).join(" ")
+
+const pick = (obj, ...keys) => {
+    for (const k of keys) {
+        if (obj?.[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k]
+    }
+    return null
+}
+
+// Converte o valor vindo do filme
+function toIds(value, list = []) {
+    if (value === null || value === undefined) return []
+
+    const items = Array.isArray(value) ? value : String(value).split(",")
+
+    return items
+        .map((item) => {
+            if (typeof item === "number") return item
+            if (item && typeof item === "object" && item.id != null) return Number(item.id)
+
+            const text =
+                item && typeof item === "object" ? labelOf(item) : String(item).trim()
+            const found = list.find((o) => normalize(labelOf(o)) === normalize(text))
+
+            return found ? found.id : null
+        })
+        .filter((id) => id !== null)
+}
+
+// formato forms
+function movieToForm(movie, options) {
+    const duration = String(movie.duracao ?? "").split(":")
+
+    return {
+        titulo: movie.titulo ?? "",
+        data: movie.ano ? `${movie.ano}-01-01` : "",
+        duracao: duration.length >= 2 ? `${duration[0].padStart(2, "0")}:${duration[1]}` : "",
+        orcamento: String(Math.trunc(Number(movie.orcamento) || 0) || ""),
+        sinopse: movie.sinopse ?? "",
+        produtoras: toIds(pick(movie, "produtoras", "produtora"), options.produtoras),
+        categorias: toIds(pick(movie, "categorias"), options.categorias),
+        diretores: toIds(pick(movie, "diretores", "diretor"), options.diretores),
+        atores: toIds(pick(movie, "atores"), options.atores),
+        paises: toIds(pick(movie, "paises", "pais"), options.paises),
+        linguagens: toIds(pick(movie, "linguagens", "linguagem"), options.linguagens),
+    }
+}
+
+export default function ModalMovieForm({
+    isOpen,
+    mode = "create", // "create" | "edit"
+    initialData = null,
+    options = {},
+    loading,
+    error,
+    onSubmit,
+    onCancel,
+}) {
+    const isEdit = mode === "edit"
+
     const [form, setForm] = useState(INITIAL)
     const [poster, setPoster] = useState(null)
     const [dragging, setDragging] = useState(false)
@@ -27,13 +90,14 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
     const [formError, setFormError] = useState("")
     const fileRef = useRef(null)
 
+    // limpa
     useEffect(() => {
-        if (isOpen) {
-            setForm(INITIAL)
-            setPoster(null)
-            setErrors({})
-            setFormError("")
-        }
+        if (!isOpen) return
+
+        setForm(isEdit && initialData ? movieToForm(initialData, options) : INITIAL)
+        setPoster(null)
+        setErrors({})
+        setFormError("")
     }, [isOpen])
 
     useEffect(() => {
@@ -86,6 +150,8 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
 
     const opt = (key) => options[key] ?? []
 
+    const currentPoster = isEdit ? initialData?.imagem : null
+
     return (
         <div className="mf-overlay" onClick={onCancel}>
             <form
@@ -97,10 +163,11 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
             >
                 <button type="button" className="mf-close" onClick={onCancel} aria-label="Fechar">×</button>
 
-                <h2 className="mf-title">Cadastrar Filme</h2>
+                <h2 className="mf-title">{isEdit ? "Editar Filme" : "Cadastrar Filme"}</h2>
                 <p className="mf-subtitle">
-                    Insira os dados do filme desejado. Sua solicitação será analisada e
-                    aprovada por um administrador antes de entrar na plataforma.
+                    {isEdit
+                        ? "Envie os dados editados do filme desejado. Sua solicitação será analisada e aprovada por um administrador antes de entrar na plataforma."
+                        : "Insira os dados do filme desejado. Sua solicitação será analisada e aprovada por um administrador antes de entrar na plataforma."}
                 </p>
 
                 <label className="mf-field">
@@ -135,13 +202,7 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
 
                 <label className="mf-field">
                     <span>Duração (horas:minutos)</span>
-                    <input
-                        name="duracao"
-                        type="time"
-                        step="60"
-                        value={form.duracao}
-                        onChange={handleChange}
-                    />
+                    <input name="duracao" type="time" step="60" value={form.duracao} onChange={handleChange} />
                     {errors.duracao && <small className="mf-error">{errors.duracao}</small>}
                 </label>
 
@@ -160,7 +221,7 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
                     {errors.sinopse && <small className="mf-error">{errors.sinopse}</small>}
                 </label>
 
-                <p className="mf-section">Pôster do filme</p>
+                <p className="mf-section">Pôster do filme{isEdit ? " (opcional: mantém o atual)" : ""}</p>
 
                 <div
                     className={`mf-dropzone ${dragging ? "dragging" : ""}`}
@@ -174,7 +235,13 @@ export default function ModalMovieForm({ isOpen, options, loading, error, onSubm
                         <path d="M12 16V4M6 10l6-6 6 6M4 20h16" />
                     </svg>
                     <p>
-                        {poster ? <strong>{poster.name}</strong> : <>Drag and drop files here <br />or <u>browse</u> to upload.</>}
+                        {poster ? (
+                            <strong>{poster.name}</strong>
+                        ) : currentPoster ? (
+                            <>Pôster atual mantido <br />ou <u>browse</u> para trocar.</>
+                        ) : (
+                            <>Drag and drop files here <br />or <u>browse</u> to upload.</>
+                        )}
                     </p>
                     <input ref={fileRef} type="file" accept="image/*" hidden
                         onChange={(e) => { pickFile(e.target.files[0]); e.target.value = "" }} />

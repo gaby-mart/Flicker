@@ -118,13 +118,13 @@
     filter: brightness(1.1);
 }
 
-/* Remove qualquer fundo atrás dos textos e informações */
+
 .movie-detail-card .movie-detail-info,
 .movie-detail-card .movie-detail-info * {
     background: transparent !important;
 }
 
-/* Mantém os fundos dos botões */
+
 .movie-detail-card .btn-edit {
     background: var(--accent, #8b0000) !important;
 }

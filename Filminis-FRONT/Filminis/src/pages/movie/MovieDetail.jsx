@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
-import { getIdMovie, deleteMovie } from "../../service/http"
-import { isAdmin } from "../../service/auth"
+import { getIdMovie } from "../../service/http"
+import { isLoggedIn } from "../../service/auth"
+import { requestDelete, requestEdit } from "../../service/request"
+import { uploadImage } from "../../service/upload"
+import useMovieOptions from "../../hooks/useMovieOptions"
 import MovieDetailCard from "../../components/jsx/MovieDetailCard"
+import ModalMovieForm from "../../components/jsx/ModalMovieForm"
+import ModalDeleteRequest from "../../components/jsx/ModalDeleteRequest"
+import ToastNotification from "../../components/jsx/ToastNotification"
 
 import "./MovieDetail.css"
 
@@ -15,6 +21,20 @@ export default function MovieDetail() {
     const [movie, setMovie] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+
+    // Modais
+    const { options, loadOptions } = useMovieOptions()
+    const [editOpen, setEditOpen] = useState(false)
+    const [deleteOpen, setDeleteOpen] = useState(false)
+    const [sending, setSending] = useState(false)
+    const [modalError, setModalError] = useState("")
+
+    // Toast
+    const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" })
+    const closeToast = useCallback(
+        () => setToast((prev) => ({ ...prev, isOpen: false })),
+        []
+    )
 
     useEffect(() => {
         async function loadMovie() {
@@ -37,14 +57,86 @@ export default function MovieDetail() {
         }
     }, [id])
 
-    async function handleDelete() {
-        if (!window.confirm(`Excluir "${movie.titulo}"?`)) return
+    async function openEditModal() {
+        if (!isLoggedIn()) return navigate("/login")
+
+        setModalError("")
+        await loadOptions()
+        setEditOpen(true)
+    }
+
+    //Edit
+    async function handleSubmitEdit({ form, poster }) {
+        setSending(true)
+        setModalError("")
 
         try {
-            await deleteMovie(id)
-            navigate("/", { replace: true })
+            const alteracoes = {
+                titulo: form.titulo.trim(),
+                ano: new Date(form.data).getFullYear(),
+                sinopse: form.sinopse.trim(),
+                duracao: `${form.duracao.slice(0, 5)}:00`,
+                orcamento: String(form.orcamento || "0"),
+                categorias: form.categorias,
+                produtoras: form.produtoras,
+                diretores: form.diretores,
+                atores: form.atores,
+                paises: form.paises,
+                linguagens: form.linguagens,
+            }
+
+            if (poster) alteracoes.imagem = await uploadImage(poster)
+
+            await requestEdit(movie, alteracoes)
+
+            setEditOpen(false)
+            setToast({
+                isOpen: true,
+                message: "Solicitação de edição enviada! Aguarde a análise de um administrador.",
+                type: "success",
+            })
         } catch (err) {
-            alert(err.message)
+            setModalError(err.message)
+            setToast({
+                isOpen: true,
+                message: "Não foi possível enviar a solicitação.",
+                type: "warning",
+            })
+        } finally {
+            setSending(false)
+        }
+    }
+
+    //Excluir
+    function openDeleteModal() {
+        if (!isLoggedIn()) return navigate("/login")
+
+        setModalError("")
+        setDeleteOpen(true)
+    }
+
+    async function handleSubmitDelete(reason) {
+        setSending(true)
+        setModalError("")
+
+        try {
+            await requestDelete(movie, reason)
+
+            setDeleteOpen(false)
+            setToast({
+                isOpen: true,
+                message: "Solicitação de exclusão enviada! Aguarde a análise de um administrador.",
+                type: "success",
+            })
+        } catch (err) {
+            setModalError(err.message)
+            setToast({
+                isOpen: true,
+                message: "Não foi possível enviar a solicitação.",
+                type: "warning",
+            })
+        } finally {
+            setSending(false)
         }
     }
 
@@ -56,11 +148,37 @@ export default function MovieDetail() {
             {!loading && !error && movie && (
                 <MovieDetailCard
                     movie={movie}
-                    canEdit={isAdmin()}
-                    onEdit={() => navigate(`/filme/editar?id=${id}`)}
-                    onDelete={handleDelete}
+                    onEdit={openEditModal}
+                    onDelete={openDeleteModal}
                 />
             )}
+
+            <ModalMovieForm
+                isOpen={editOpen}
+                mode="edit"
+                initialData={movie}
+                options={options}
+                loading={sending}
+                error={modalError}
+                onSubmit={handleSubmitEdit}
+                onCancel={() => setEditOpen(false)}
+            />
+
+            <ModalDeleteRequest
+                isOpen={deleteOpen}
+                movie={movie}
+                loading={sending}
+                error={modalError}
+                onSubmit={handleSubmitDelete}
+                onCancel={() => setDeleteOpen(false)}
+            />
+
+            <ToastNotification
+                isOpen={toast.isOpen}
+                message={toast.message}
+                type={toast.type}
+                onClose={closeToast}
+            />
         </section>
     )
 }
