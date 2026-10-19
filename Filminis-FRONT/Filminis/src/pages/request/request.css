@@ -1,0 +1,185 @@
+.requests-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+  max-width: 900px;
+}
+
+.request-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  color: #f5f5f5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Tira o fundo preto herdado do CSS global em tudo que fica dentro do card.
+   :where() mantém a especificidade baixa e não atropela badges e botões. */
+.request-card :where(div, p, ul, li, strong, h3) {
+  background: transparent;
+}
+
+.request-poster-wrapper {
+  flex-shrink: 0;
+  width: 200px;
+  height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.request-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Quando não há pôster */
+.request-poster-empty {
+  background: #2a2a2a;
+}
+
+.request-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 12px;
+  min-width: 0;
+}
+
+.request-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.request-card-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.badge-action {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.delete-badge {
+  color: #ffffff;
+  background: #ff2a2a;
+}
+
+.add-badge,
+.edit-badge {
+  background: #780606;
+  color: #ffffff;
+}
+
+.request-details {
+  font-size: 13px;
+  color: rgba(245, 245, 245, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.request-label {
+  font-weight: 500;
+  color: rgba(245, 245, 245, 0.5);
+  margin: 0;
+}
+
+.request-text-block {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Informações do filme (mesmo conteúdo do card de detalhes) */
+.request-meta {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: rgba(245, 245, 245, 0.8);
+}
+
+.request-meta strong {
+  color: #ffffff;
+}
+
+.request-description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(245, 245, 245, 0.7);
+}
+
+.edit-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-accept {
+  background-color: #7b0d0d;
+  color: #ffffff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-accept:hover {
+  background-color: #e01414;
+}
+
+.btn-reject {
+  background-color: #ffffff;
+  color: #161616;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reject:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-accept:disabled,
+.btn-reject:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.no-requests {
+  color: rgba(245, 245, 245, 0.5);
+  text-align: center;
+  padding: 40px;
+}

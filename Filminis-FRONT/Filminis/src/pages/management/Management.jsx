@@ -1,11 +1,9 @@
-//Componentes
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import ToastNotification from "../../components/jsx/ToastNotification"
 import { getMovies, deleteMovie } from "../../service/http"
 import Pagination from "../../components/jsx/Pagination.jsx"
 import FiltersManagement from "../../components/jsx/FiltersManagement.jsx"
 
-//Styles
 import "./Management.css"
 
 const normalizar = (texto) =>
@@ -28,6 +26,14 @@ const truncateText = (value, maxLength = 60) => {
   return text.substring(0, maxLength).trim() + "..."
 }
 
+// "2026-10-19 07:42:50" -> "19/10/2026"
+const formatDate = (value) => {
+  if (!value) return "-"
+  const [date] = String(value).split(/[ T]/)
+  const [y, m, d] = date.split("-")
+  return y && m && d ? `${d}/${m}/${y}` : String(value)
+}
+
 export default function Management() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,11 +51,11 @@ export default function Management() {
   const [itemToDelete, setItemToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
-  const [toast, setToast] = useState({
-    isOpen: false,
-    message: "",
-    type: "success",
-  })
+  const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" })
+  const closeToast = useCallback(
+    () => setToast((prev) => ({ ...prev, isOpen: false })),
+    []
+  )
 
   useEffect(() => {
     async function fetchMovies() {
@@ -59,6 +65,7 @@ export default function Management() {
         setMovies(Array.isArray(data) ? data : [])
       } catch (err) {
         console.error("Erro ao carregar filmes:", err)
+        setToast({ isOpen: true, message: "Erro ao carregar os filmes.", type: "warning" })
       } finally {
         setLoading(false)
       }
@@ -103,9 +110,10 @@ export default function Management() {
   const startIndex = (currentPage - 1) * rowsPerPage
   const paginatedMovies = filteredMovies.slice(startIndex, startIndex + rowsPerPage)
 
-  const handleConfirmDelete = async () => {
+  async function handleConfirmDelete() {
     if (!itemToDelete) return
     setDeleting(true)
+
     try {
       await deleteMovie(itemToDelete.id)
       setMovies((prev) => prev.filter((m) => m.id !== itemToDelete.id))
@@ -113,7 +121,11 @@ export default function Management() {
       setItemToDelete(null)
     } catch (err) {
       console.error(err)
-      setToast({ isOpen: true, message: "Erro ao excluir filme.", type: "warning" })
+      setToast({
+        isOpen: true,
+        message: err.message || "Erro ao excluir filme.",
+        type: "warning",
+      })
     } finally {
       setDeleting(false)
     }
@@ -126,6 +138,10 @@ export default function Management() {
       </div>
 
       <div className="management-header-actions">
+        <span className="results-count">
+          Total de filmes: {filteredMovies.length}
+        </span>
+
         <FiltersManagement
           busca={busca}
           setBusca={setBusca}
@@ -157,21 +173,26 @@ export default function Management() {
                   paginatedMovies.map((movie) => (
                     <tr key={movie.id}>
                       <td className="movie-name-cell">{movie.titulo}</td>
+
                       <td className="table-description" title={movie.sinopse}>
                         {truncateText(movie.sinopse, 50)}
                       </td>
-                      <td className="table-description" title={String(movie.categorias ?? "")}>
+
+                      <td
+                        className="table-description"
+                        title={Array.isArray(movie.categorias) ? movie.categorias.join(", ") : movie.categorias}
+                      >
                         {truncateText(movie.categorias, 50)}
                       </td>
-                      <td className="table-description" title={movie.aprovado_por}>
-                        {truncateText(movie.aprovado_por, 50)}
-                      </td>
-                      <td>{movie.data_aprovacao || movie.criado_em || "-"}</td>
+
+                      <td>{movie.aprovado_por ?? "-"}</td>
+
+                      <td>{formatDate(movie.data_aprov ?? movie.data_aprovacao)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="table-empty">
+                    <td colSpan={6} className="table-empty">
                       Nenhum registro encontrado.
                     </td>
                   </tr>
@@ -197,33 +218,8 @@ export default function Management() {
         isOpen={toast.isOpen}
         message={toast.message}
         type={toast.type}
-        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
+        onClose={closeToast}
       />
-
-      {itemToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h3>Deseja excluir "{itemToDelete.titulo}"?</h3>
-            <p>Esta ação não poderá ser desfeita.</p>
-            <div className="modal-actions">
-              <button
-                className="btn-cancel"
-                onClick={() => setItemToDelete(null)}
-                disabled={deleting}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-confirm-delete"
-                onClick={handleConfirmDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }

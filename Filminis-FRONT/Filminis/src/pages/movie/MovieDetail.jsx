@@ -41,17 +41,26 @@ export default function MovieDetail() {
             setLoading(true)
             setError("")
 
-            const data = await getIdMovie(id)
-            const found = Array.isArray(data) ? data[0] : data
+            try {
+                const data = await getIdMovie(id)
+                const found = Array.isArray(data) ? data[0] : data
 
-            if (!found || found.error) setError("Não foi possível carregar este filme.")
-            else setMovie(found)
-
-            setLoading(false)
+                if (!found || found.error) {
+                    setError("Não foi possível carregar este filme.")
+                } else {
+                    setMovie(found)
+                }
+            } catch (err) {
+                console.error(err)
+                setError("Erro ao carregar detalhes do filme.")
+            } finally {
+                setLoading(false)
+            }
         }
 
-        if (id) loadMovie()
-        else {
+        if (id) {
+            loadMovie()
+        } else {
             setError("Filme não informado.")
             setLoading(false)
         }
@@ -61,11 +70,20 @@ export default function MovieDetail() {
         if (!isLoggedIn()) return navigate("/login")
 
         setModalError("")
-        await loadOptions()
-        setEditOpen(true)
+        try {
+            await loadOptions()
+            setEditOpen(true)
+        } catch (err) {
+            console.error(err)
+            setToast({
+                isOpen: true,
+                message: "Erro ao carregar opções para edição.",
+                type: "warning",
+            })
+        }
     }
 
-    //Edit
+    // Edição
     async function handleSubmitEdit({ form, poster }) {
         setSending(true)
         setModalError("")
@@ -85,7 +103,9 @@ export default function MovieDetail() {
                 linguagens: form.linguagens,
             }
 
-            if (poster) alteracoes.imagem = await uploadImage(poster)
+            if (poster) {
+                alteracoes.imagem = await uploadImage(poster)
+            }
 
             await requestEdit(movie, alteracoes)
 
@@ -96,7 +116,7 @@ export default function MovieDetail() {
                 type: "success",
             })
         } catch (err) {
-            setModalError(err.message)
+            setModalError(err.message || "Erro desconhecido")
             setToast({
                 isOpen: true,
                 message: "Não foi possível enviar a solicitação.",
@@ -107,7 +127,7 @@ export default function MovieDetail() {
         }
     }
 
-    //Excluir
+    // Exclusão
     function openDeleteModal() {
         if (!isLoggedIn()) return navigate("/login")
 
@@ -129,7 +149,7 @@ export default function MovieDetail() {
                 type: "success",
             })
         } catch (err) {
-            setModalError(err.message)
+            setModalError(err.message || "Erro ao solicitar exclusão")
             setToast({
                 isOpen: true,
                 message: "Não foi possível enviar a solicitação.",

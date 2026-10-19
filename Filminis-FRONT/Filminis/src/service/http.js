@@ -4,16 +4,25 @@ const DATA_URL = import.meta.env.VITE_DATA_URL || "http://localhost:8000"
 
 async function get(path) {
     const response = await fetch(`${DATA_URL}${path}`)
-
     if (!response.ok) throw new Error(`Erro ${response.status} em ${path}`)
-
     return response.json()
 }
 
-// Lista todos os filmes (a busca por nome é feita no front, na Home)
+async function send(path, options, fallback) {
+    const response = await authFetch(path, options)
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data.error || fallback)
+    return data
+}
+
+const jsonBody = (method, body) => ({
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+})
+
 export const getMovies = () => get("/listagem")
 
-// Um filme pelo id
 export async function getIdMovie(id) {
     try {
         return await get(`/filme?id=${id}`)
@@ -23,7 +32,6 @@ export async function getIdMovie(id) {
     }
 }
 
-// Listas auxiliares (úteis para filtros e formulários)
 export const getActors = () => get("/atores")
 export const getDirectors = () => get("/diretores")
 export const getCategories = () => get("/categorias")
@@ -31,25 +39,24 @@ export const getProducers = () => get("/produtoras")
 export const getLanguages = () => get("/linguagens")
 export const getCountries = () => get("/paises")
 
+export const requestMovie = (dados) =>
+    send("/cadastrani", jsonBody("POST", dados), "Erro ao enviar a solicitação")
 
-export async function deleteMovie(id) {
-    const response = await authFetch(`/filme?id=${id}`, { method: "DELETE" })
-    const data = await response.json().catch(() => ({}))
+// Restrito para administradores
+export const getPendingMovies = () =>
+    send("/filmesPendentes", {}, "Erro ao buscar filmes pendentes")
 
-    if (!response.ok) throw new Error(data.error || "Erro ao excluir o filme")
+export const approveMovie = (id) =>
+    send(`/aprovafilme?id=${id}`, { method: "PUT" }, "Erro ao aprovar o filme")
 
-    return data
-}
+export const updateMovie = (id, alteracoes) =>
+    send(`/filme?id=${id}`, jsonBody("PATCH", alteracoes), "Erro ao editar o filme")
 
-export async function requestMovie(dados) {
-    const response = await authFetch("/cadastrani", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-    })
+export const deleteMovie = (id) =>
+    send(`/filme?id=${id}`, { method: "DELETE" }, "Erro ao excluir o filme")
 
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok) throw new Error(data.error || "Erro ao enviar a solicitação")
+export const getMe = () =>
+    send("/me", {}, "Erro ao buscar os dados do usuário")
 
-    return data
-}
+export const updateMe = (dados) =>
+    send("/me", jsonBody("PATCH", dados), "Erro ao atualizar o perfil")

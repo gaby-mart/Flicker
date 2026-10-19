@@ -14,9 +14,9 @@ function clearTokens() {
     localStorage.removeItem(REFRESH_KEY)
 }
 
-// Lê o payload do JWT: { sub (e-mail), role, exp, type }
+// Lê o payload do JWT
 export function getUserFromToken() {
-    const token = getToken()
+    const token = getToken() || getRefreshToken()
     if (!token) return null
 
     try {
@@ -30,7 +30,6 @@ export function getUserFromToken() {
 export const isAdmin = () => getUserFromToken()?.role === "admin"
 
 export async function login(email, password) {
-    // O backend lê form-urlencoded, não JSON
     const response = await fetch(`${DATA_URL}/send_loginho`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -43,6 +42,20 @@ export async function login(email, password) {
 
     localStorage.setItem(ACCESS_KEY, data.access_token)
     localStorage.setItem(REFRESH_KEY, data.refresh_token)
+
+    return data
+}
+
+export async function register(dados) {
+    const response = await fetch(`${DATA_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) throw new Error(data.error || "Erro ao cadastrar usuário")
 
     return data
 }
@@ -65,7 +78,7 @@ async function refreshAccessToken() {
     return true
 }
 
-// fetch que envia o token e tenta renovar uma vez se vier 401
+// fetch que envia o token
 export async function authFetch(path, options = {}) {
     const doFetch = () =>
         fetch(`${DATA_URL}${path}`, {
@@ -82,7 +95,7 @@ export async function authFetch(path, options = {}) {
         if (await refreshAccessToken()) {
             response = await doFetch()
         } else {
-            clearTokens()
+            clearTokens() // refresh expirou: precisa logar de novo
         }
     }
 
@@ -115,16 +128,3 @@ export async function logout() {
     }
 }
 
-export async function register(dados) {
-    const response = await fetch(`${DATA_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) throw new Error(data.error || "Erro ao cadastrar usuário")
-
-    return data
-}

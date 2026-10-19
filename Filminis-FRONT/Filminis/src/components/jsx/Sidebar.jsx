@@ -6,7 +6,7 @@ import "../css/Sidebar.css"
 import logo from "../../assets/images/logo.svg"
 import homeImg from "../../assets/images/home.svg"
 import logoutImg from "../../assets/images/logout.svg"
-import filmesImg from "../../assets/images/filmes.svg"
+import userImg from "../../assets/images/user.svg"
 import loginImg from "../../assets/images/login.svg"
 import solicitacaoImg from "../../assets/images/solicitacao.svg"
 import gerenciamentoImg from "../../assets/images/gerenciamento.svg"
@@ -50,7 +50,7 @@ export default function Sidebar() {
 
                 <nav className="sidebar-nav">
                     <NavItem path="/" name="Home" icon={homeImg} end />
-                    <NavItem path="/filmes" name="Filmes" icon={filmesImg} />
+                    <NavItem path="/user" name="Informações de perfil" icon={userImg} />
                 </nav>
 
                 {/* Somente para administradores */}
@@ -63,7 +63,7 @@ export default function Sidebar() {
 
                         <nav className="sidebar-nav">
                             <NavItem
-                                path="/solicitacoes"
+                                path="/request"
                                 name="Solicitações"
                                 icon={solicitacaoImg}
                             />

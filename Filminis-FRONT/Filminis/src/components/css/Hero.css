@@ -24,7 +24,6 @@
     background-repeat: no-repeat;
 }
 
-/* Degradê escuro à esquerda e embaixo */
 .banner-slide::before {
     content: "";
     position: absolute;
@@ -34,7 +33,6 @@
         linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 55%);
 }
 
-/* Texto empilhado no canto inferior esquerdo */
 .banner-info {
     position: absolute;
     left: 32px;
@@ -91,7 +89,6 @@
     filter: brightness(1.2);
 }
 
-/* Paginação sobre o banner, rente à borda inferior */
 .banner .swiper-pagination {
     position: absolute;
     bottom: 10px;

@@ -1,0 +1,135 @@
+.profile {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 0;
+  color: #f5f5f5;
+}
+
+.profile-card {
+  background: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Card da esquerda */
+.profile-side {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+}
+
+.profile-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #780606;
+  color: #fff;
+  font-size: 56px;
+  font-weight: 600;
+}
+
+.profile-name {
+    background-color: transparent;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  word-break: break-word;
+}
+
+.profile-logout {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: #f5f5f5;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.profile-logout img{
+    background-color: transparent;
+}
+
+.profile-logout:hover {
+  color: #e01414;
+}
+
+/* Card da direita */
+.profile-data {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.profile-data h1 {
+    background-color: transparent;
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.profile-field {
+    background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 12px;
+  color: rgba(245, 245, 245, 0.7);
+}
+
+.profile-field span {
+    background-color: transparent;
+}
+
+.profile-value {
+  background: #3a3a3a;
+  color: #f5f5f5;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 14px;
+  min-height: 20px;
+  word-break: break-word;
+}
+
+.profile-status {
+  text-align: center;
+  padding: 40px;
+  color: rgba(245, 245, 245, 0.5);
+}
+
+@media (max-width: 720px) {
+  .profile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .profile-side {
+    flex-basis: auto;
+  }
+}

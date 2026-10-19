@@ -24,14 +24,12 @@
   background: transparent !important;
 }
 
-/* Sucesso (verde) */
 .toast-notification.success {
   background-color: #c8f7d5;
   color: #1e4620;
   border: 1px solid #a3e9b7;
 }
 
-/* Alerta (amarelo) */
 .toast-notification.warning {
   background-color: #ffeeb3;
   color: #5c4300;

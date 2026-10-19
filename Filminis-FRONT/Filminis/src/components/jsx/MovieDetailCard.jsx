@@ -1,7 +1,6 @@
 import { useState } from "react"
 import "../css/MovieDetailCard.css"
 
-// Primeiro campo que existir no objeto
 const pick = (obj, ...keys) => {
     for (const key of keys) {
         if (obj?.[key] !== undefined && obj[key] !== null && obj[key] !== "") {
@@ -11,7 +10,6 @@ const pick = (obj, ...keys) => {
     return null
 }
 
-// Aceita texto, lista de textos ou lista de objetos 
 const nameOf = (v) => {
     if (v === null || v === undefined) return ""
     if (typeof v !== "object") return String(v)
@@ -33,7 +31,7 @@ const formatMoney = (value) => {
     return number.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 }
 
-// "03:15:00" -> "3h 15min"
+// "03:15:00"
 const formatDuration = (value) => {
     if (!value) return "—"
     const [h = "0", m = "0"] = String(value).split(":")

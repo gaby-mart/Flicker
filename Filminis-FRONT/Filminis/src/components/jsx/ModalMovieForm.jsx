@@ -32,7 +32,6 @@ const pick = (obj, ...keys) => {
     return null
 }
 
-// Converte o valor vindo do filme
 function toIds(value, list = []) {
     if (value === null || value === undefined) return []
 

@@ -27,10 +27,8 @@ export default function ToastNotification({
     <div className={`toast-notification ${type}`}>
       <div className="toast-icon">
         {type === "warning" ? (
-          // Ícone de Alerta (Triângulo com exclamação)
           <img src={alertImg} alt="Algo deu errado"/>
         ) : (
-          // Ícone de Sucesso (Check)
           <img src={checkImg} alt="Ação feita com sucesso"/>
         )}
       </div>

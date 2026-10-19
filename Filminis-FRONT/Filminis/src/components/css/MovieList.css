@@ -1,16 +1,14 @@
-/* Grade de Filmes centralizada com 5 colunas por linha */
 .movie-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(160px, 200px)); /* Garante 5 cards exatos por linha */
-    justify-content: center; /* Centraliza o grid horizontalmente na tela */
+    grid-template-columns: repeat(5, minmax(160px, 200px)); 
+    justify-content: center;
     gap: 20px;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto; /* Centraliza o bloco inteiro */
+    margin: 0 auto; 
     padding: 20px 0;
 }
 
-/* Card Individual */
 .movie-card {
     position: relative;
     background-color: var(--surface-2, #161616);
@@ -34,15 +32,13 @@
     position: relative;
 }
 
-/* Pôster do Filme */
 .movie-poster {
     width: 100%;
-    height: 250px; /* Altura proporcional para os 5 cards caberem lado a lado */
+    height: 250px; 
     object-fit: cover;
     display: block;
 }
 
-/* Botão de Opções (Três pontinhos no canto superior) */
 .movie-options-btn {
     position: absolute;
     top: 10px;
@@ -73,7 +69,6 @@
     background: rgba(224, 20, 20, 0.8);
 }
 
-/* Área de Informações (Título na parte inferior com gradiente) */
 .movie-info {
     position: absolute;
     bottom: 0;

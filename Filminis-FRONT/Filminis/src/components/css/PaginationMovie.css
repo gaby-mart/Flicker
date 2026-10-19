@@ -1,5 +1,5 @@
 .pagination {
-  --pg-blue: #E01414; /* Cor de destaque do Flicker (vermelho) */
+  --pg-blue: #E01414; 
   --pg-bg: rgba(255, 255, 255, 0.08);
   --pg-text: #F5F5F5;
   --pg-muted: rgba(245, 245, 245, 0.4);
@@ -30,7 +30,6 @@
   gap: 6px;
 }
 
-/* Select de linhas por página (estilo arredondado escuro conforme o print) */
 .pagination-select {
   height: 38px;
   min-width: 68px;
@@ -60,14 +59,12 @@
   color: #F5F5F5;
 }
 
-/* Foco de acessibilidade nos botões */
 .pagination-page:focus-visible,
 .pagination-arrow:focus-visible {
   outline: 2px solid var(--pg-blue);
   outline-offset: 2px;
 }
 
-/* Botões numerados redondos */
 .pagination-page {
   width: 36px;
   height: 36px;
@@ -96,7 +93,6 @@
   box-shadow: 0 4px 12px rgba(224, 20, 20, 0.35);
 }
 
-/* Setas de navegação */
 .pagination-arrow {
   display: flex;
   align-items: center;

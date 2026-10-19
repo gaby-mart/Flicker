@@ -27,7 +27,7 @@ export default function Pagination({
 
   return (
     <div className="pagination">
-      {/* Lado esquerdo: linhas por página + intervalo */}
+      {/* Lado esquerdo: linhas por página */}
       <div className="pagination-left">
         <label htmlFor="rows-per-page" className="pagination-label">
           Linhas por página
@@ -54,7 +54,7 @@ export default function Pagination({
         </span>
       </div>
 
-      {/* Lado direito: setas + números */}
+      {/* Lado direito: setas  */}
       <nav className="pagination-nav" aria-label="Paginação">
         <button
           type="button"
