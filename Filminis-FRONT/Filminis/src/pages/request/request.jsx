@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 import { getRequests, updateRequestStatus } from "../../service/request"
 import { getPendingMovies, getIdMovie, approveMovie, updateMovie, deleteMovie } from "../../service/http"
 import { pick, movieRows } from "../../service/movieFormat"
+import useMovieOptions from "../../hooks/useMovieOptions"
 import ToastNotification from "../../components/jsx/ToastNotification"
 
 import "./request.css"
@@ -14,17 +15,47 @@ const LABELS = {
     duracao: "Duração",
     orcamento: "Orçamento",
     imagem: "Pôster",
-    categorias: "Gêneros (ids)",
-    produtoras: "Produtoras (ids)",
-    diretores: "Diretores (ids)",
-    atores: "Atores (ids)",
-    paises: "Países (ids)",
-    linguagens: "Idiomas (ids)",
+    categorias: "Gêneros",
+    produtoras: "Produtoras",
+    diretores: "Direção",
+    atores: "Elenco",
+    paises: "Origem",
+    linguagens: "Idiomas",
 }
 
-const formatValue = (v) => (Array.isArray(v) ? v.join(", ") || "—" : String(v))
+const labelOf = (o) => [o.nome ?? o.name, o.sobrenome].filter(Boolean).join(" ")
 
-// Mesmas informações do card de detalhes do filme
+// id do item
+const idOf = (o) =>
+    o.id ?? Object.entries(o).find(([k]) => k.startsWith("id_") && k !== "id_genero")?.[1]
+
+function formatValue(key, val, lists) {
+    if (Array.isArray(val)) {
+        const list = lists[key] ?? []
+        const names = val.map((id) => {
+            const found = list.find((o) => Number(idOf(o)) === Number(id))
+            return found ? labelOf(found) : `#${id}`
+        })
+        return names.join(", ") || "—"
+    }
+
+    if (key === "orcamento") {
+        const n = Number(val)
+        return Number.isNaN(n)
+            ? String(val)
+            : n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+    }
+
+    if (key === "duracao") {
+        const [h = "0", m = "0"] = String(val).split(":")
+        return `${Number(h)}h ${m.padStart(2, "0")}min`
+    }
+
+    if (key === "imagem") return "Novo pôster enviado"
+
+    return String(val)
+}
+
 function MovieInfo({ movie }) {
     return (
         <>
@@ -45,9 +76,12 @@ function MovieInfo({ movie }) {
 
 export default function Request() {
     const [requests, setRequests] = useState([])
+    const [lists, setLists] = useState({})
     const [loading, setLoading] = useState(true)
     const [busyKey, setBusyKey] = useState(null)
     const [toast, setToast] = useState({ isOpen: false, message: "", type: "success" })
+
+    const { loadOptions } = useMovieOptions()
 
     const closeToast = useCallback(
         () => setToast((prev) => ({ ...prev, isOpen: false })),
@@ -59,10 +93,18 @@ export default function Request() {
 
     useEffect(() => {
         loadData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     async function loadData() {
         setLoading(true)
+
+        // Listas de nomes para traduzir os ids dos pedidos de edição
+        try {
+            setLists(await loadOptions())
+        } catch (err) {
+            console.error("Erro ao carregar listas:", err)
+        }
 
         // Adições: filmes pendentes no banco (GET /filmesPendentes)
         let additions = []
@@ -91,7 +133,7 @@ export default function Request() {
             notify("Não foi possível carregar os filmes pendentes.", "warning")
         }
 
-        // Edições e exclusões: pedidos guardados no localStorage
+        // Edições e exclusões
         const changes = getRequests()
             .filter((r) => r.status === "pendente")
             .map((r) => ({ ...r, key: `req-${r.id}` }))
@@ -110,7 +152,6 @@ export default function Request() {
             if (req.tipo === "adicionar") {
                 await approveMovie(req.id_filme)
             } else {
-                // primeiro executa no backend; só marca como aprovado se der certo
                 if (req.tipo === "editar") await updateMovie(req.id_filme, req.alteracoes)
                 if (req.tipo === "excluir") await deleteMovie(req.id_filme)
 
@@ -132,7 +173,6 @@ export default function Request() {
 
         try {
             if (req.tipo === "adicionar") {
-                // recusar uma adição = remover o filme pendente
                 await deleteMovie(req.id_filme)
             } else {
                 await updateRequestStatus(req.id, "rejeitado")
@@ -193,11 +233,12 @@ export default function Request() {
 
                                 {req.tipo === "editar" && (
                                     <div className="request-details">
-                                        <p className="request-label">Campos a alterar:</p>
+                                        <p className="request-label">Itens Editados:</p>
                                         <ul className="edit-list">
                                             {Object.entries(req.alteracoes ?? {}).map(([key, val]) => (
                                                 <li key={key}>
-                                                    <strong>{LABELS[key] ?? key}:</strong> {formatValue(val)}
+                                                    <strong>{LABELS[key] ?? key}:</strong>{" "}
+                                                    {formatValue(key, val, lists)}
                                                 </li>
                                             ))}
                                         </ul>
